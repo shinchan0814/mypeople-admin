@@ -10,7 +10,8 @@ import { Search, Send, Check, X, Copy, RefreshCw } from 'lucide-react';
 
 interface WaitlistItem {
   id: string;
-  email: string;
+  email: string | null;
+  phone: string | null;
   status: 'pending' | 'invited' | 'registered' | 'declined';
   source: string;
   invite_code: string | null;
@@ -34,7 +35,10 @@ export function WaitlistTable({ initialData }: WaitlistTableProps) {
   const supabase = createClient();
 
   const filteredData = data.filter((item) => {
-    const matchesSearch = item.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchLower = searchTerm.toLowerCase();
+    const matchesEmail = (item.email || '').toLowerCase().includes(searchLower);
+    const matchesPhone = (item.phone || '').toLowerCase().includes(searchLower);
+    const matchesSearch = matchesEmail || matchesPhone;
     const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -118,7 +122,7 @@ export function WaitlistTable({ initialData }: WaitlistTableProps) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
             <Input
-              placeholder="Search by email..."
+              placeholder="Search by email or phone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 w-64"
@@ -152,6 +156,9 @@ export function WaitlistTable({ initialData }: WaitlistTableProps) {
                   Email
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider">
+                  Phone
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider">
@@ -168,7 +175,7 @@ export function WaitlistTable({ initialData }: WaitlistTableProps) {
             <tbody className="divide-y divide-[#E2E8F0]">
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-[#64748B]">
+                  <td colSpan={6} className="px-6 py-8 text-center text-[#64748B]">
                     No waitlist entries found
                   </td>
                 </tr>
@@ -176,7 +183,10 @@ export function WaitlistTable({ initialData }: WaitlistTableProps) {
                 filteredData.map((item) => (
                   <tr key={item.id} className="hover:bg-[#F8FAFC]">
                     <td className="px-6 py-4">
-                      <span className="font-medium text-[#0F172A]">{item.email}</span>
+                      <span className="font-medium text-[#0F172A]">{item.email || '—'}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-[#334155]">{item.phone || '—'}</span>
                     </td>
                     <td className="px-6 py-4">{getStatusBadge(item.status)}</td>
                     <td className="px-6 py-4">
