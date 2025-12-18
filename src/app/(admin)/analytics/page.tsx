@@ -262,8 +262,8 @@ export default function AnalyticsPage() {
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="count"
-                    label={({ name, percent }) =>
-                      `${name} (${(percent * 100).toFixed(0)}%)`
+                    label={(props: any) =>
+                      `${props.name || ''} (${((props.percent ?? 0) * 100).toFixed(0)}%)`
                     }
                   >
                     {data?.eventBreakdown?.map((entry, index) => (
